@@ -240,8 +240,8 @@ Reset_Handler
         ; the .data section initializers from flash to SRAM and zero fill the
         ; .bss section.
         ;
-        IMPORT  Ex03
-        B       Ex03     ;call user assembly language program
+        IMPORT  Ex04
+        B       Ex04     ;call user assembly language program
 
 ;******************************************************************************
 ;
