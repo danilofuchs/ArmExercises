@@ -412,6 +412,11 @@
               <FileType>2</FileType>
               <FilePath>.\src\ex05.s</FilePath>
             </File>
+            <File>
+              <FileName>ex06.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\src\ex06.s</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

@@ -1,4 +1,4 @@
-; ex05.s
+; ex05.s - IF-THEN
 ; Developed for board EK-TM4C1294XL
 ; Danilo Fuchs
 ; 22/03/2020

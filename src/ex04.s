@@ -1,4 +1,4 @@
-; ex04.s
+; ex04.s - ARITHMETICS
 ; Developed for board EK-TM4C1294XL
 ; Danilo Fuchs
 ; 22/03/2020
