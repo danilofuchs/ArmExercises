@@ -1,5 +1,9 @@
-; Exemplo.s
-; Desenvolvido para a placa EK-TM4C1294XL
+; ex04.s
+; Developed for board EK-TM4C1294XL
+; Danilo Fuchs
+; 22/03/2020
+
+; Template:
 ; Prof. Guilherme Peron
 ; 12/03/2018
 
