@@ -22,23 +22,6 @@
 
         EXPORT Ex07
 ; ------------------------------------------------------------------------------
-add5until50
-    ; while (R0 < 50) { R0 = R0 + 5 }
-    cmp R0, #50
-    bxeq  LR        ; Is 50? Return to initial caller
-    add R0, #5      ; Not 50, should add 5
-    b   add5until50 ; Call itselt, not altering LR
-
-func2
-    ;   d.1) Copia o R0 para R1
-    ;   d.2) Verifica se R1 é menor que 50
-    ;   d.3) Se for menor que 50 incrementa, caso contrário modifica para -50
-    mov R1, R0
-    cmp R1, #50
-    ite     lo
-        addlo R1, #1
-        movhs R1, #-50
-    bx LR
 
 Ex07
 ; Start Here <======================================================
@@ -59,6 +42,27 @@ Ex07
     bl func2
 
     nop
+
+endProgram 
+    b endProgram
+
+add5until50
+    ; while (R0 < 50) { R0 = R0 + 5 }
+    cmp R0, #50
+    bxeq  LR        ; Is 50? Return to initial caller
+    add R0, #5      ; Not 50, should add 5
+    b   add5until50 ; Call itselt, not altering LR
+
+func2
+    ;   d.1) Copia o R0 para R1
+    ;   d.2) Verifica se R1 é menor que 50
+    ;   d.3) Se for menor que 50 incrementa, caso contrário modifica para -50
+    mov R1, R0
+    cmp R1, #50
+    ite     lo
+        addlo R1, #1
+        movhs R1, #-50
+    bx LR
 
     align
     end

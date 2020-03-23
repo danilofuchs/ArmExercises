@@ -22,31 +22,6 @@
 
         EXPORT Ex08
 ; ------------------------------------------------------------------------------
-fatorial
-    ; R3 = Number to multiply by the accumulator
-    mov R3, R2
-    ; R0 = accumulator and result
-    mov R0, #1
-    push {LR}
-    bl fatorialStep
-    pop {LR}
-    bx LR
-
-fatorialStep
-    ; R3 = Number to multiply by the accumulator
-    ; R0 = accumulator and result
-    cmp R3, #1
-    ittt      hi
-        ; if(R3 > 1) {
-        ;   R0 = R0 * R3;
-        ;   R3 = R3 - 1;
-        ;   fatorial();
-        ; }
-        mulhi R0, R3
-        subhi R3, #1
-        bhi fatorialStep
-    bx LR
-
 Ex08
 ; Start Here <======================================================
 	
@@ -64,8 +39,36 @@ Ex08
     ; Load RAM data to R2 
     ldr R2, [R10]
 
-    bl fatorial
+    bl factorial
     
     nop
+    
+endProgram 
+    b endProgram
+    
+factorial
+    ; R3 = Number to multiply by the accumulator
+    mov R3, R2
+    ; R0 = accumulator and result
+    mov R0, #1
+    push {LR}
+    bl factorialStep
+    pop {LR}
+    bx LR
+
+factorialStep
+    ; R3 = Number to multiply by the accumulator
+    ; R0 = accumulator and result
+    cmp R3, #1
+    ittt      hi
+        ; if(R3 > 1) {
+        ;   R0 = R0 * R3;
+        ;   R3 = R3 - 1;
+        ;   fatorial();
+        ; }
+        mulhi R0, R3
+        subhi R3, #1
+        bhi factorialStep
+    bx LR
     align
     end
