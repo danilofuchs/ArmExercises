@@ -240,8 +240,8 @@ Reset_Handler
         ; the .data section initializers from flash to SRAM and zero fill the
         ; .bss section.
         ;
-        IMPORT  Ex08
-        B       Ex08     ;call user assembly language program
+        IMPORT  PrimeNumbers
+        B       PrimeNumbers     ;call user assembly language program
 
 ;******************************************************************************
 ;
