@@ -428,9 +428,14 @@
               <FilePath>.\src\ex08.s</FilePath>
             </File>
             <File>
-              <FileName>primeNumbers.s</FileName>
+              <FileName>atv_adnp_01.s</FileName>
               <FileType>2</FileType>
-              <FilePath>.\src\primeNumbers.s</FilePath>
+              <FilePath>.\src\atv_adnp_01.s</FilePath>
+            </File>
+            <File>
+              <FileName>atv_presencial_02.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\src\atv_presencial_02.s</FilePath>
             </File>
           </Files>
         </Group>
