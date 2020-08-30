@@ -117,14 +117,14 @@ restartCheck
 
 bubbleSort
     cmp R9, R1
-    bxge LR
+    bxge LR ; Go back if end of array
 
     push {LR}
-    ldr R4, =UNORDERED_PRIME_NUMBERS
+    ldr R4, =UNORDERED_PRIME_NUMBERS ; Do a pass from the start
     bl bubbleSortPass
     pop {LR}
 
-    add R9, #1
+    add R9, #1 ; Increment R9 (checks if end of array next)
     b bubbleSort
 
 bubbleSortPass
@@ -139,7 +139,7 @@ bubbleSortPass
     blhi invertPositions ; If R6 > R7, should invert
     pop {LR}
 
-    b bubbleSortPass
+    b bubbleSortPass ; Continue to check from the next memory
 
 invertPositions
     mov R8, R6 ; Save to temporary reg
@@ -154,6 +154,7 @@ invertPositions
 NUMBERS_ARRAY DCB 0xC1,0x40,0xB0,0x7F,0x2B,0x13,0xD3,0x03,0xCB,0x05,0x15,0x7F,0xCE,0xF5,0x9D,0xED,0xF1,0x69,0xFC,0x13,0
 ;                  193;	 63; 176; 127;  43;  19; 211;   3; 203;   5;  21; 127; 206; 245; 157; 237; 241;	105; 252;  19, \0
 ;         Ordered: 3, 5, 19, 19, 21, 43, 64, 105, 127, 127, 157, 176, 193, 203, 206, 211, 237, 241, 245, 252
-;     Ordered hex: ["3", "5", "13", "13", "15", "2b", "40", "69", "7f", "7f", "9d", "b0", "c1", "cb", "ce", "d3", "ed", "f1", "f5", "fc"]
+;        Primes hex: ["c1", "7f", "2b", "13", "d3", "03", "05", "7f", "9d", "f1", "13"]
+;  Primes hex (asc): ["03", "05", "13", "13", "2b", "7f", "7f", "9d", "c1", "d3", "f1"]
     align
     end
