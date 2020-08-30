@@ -67,7 +67,7 @@ PrimeNumbersList
 
     bl checkIfBelowMaxAndPrime
 
-    ldr R4, =UNORDERED_PRIME_NUMBERS
+    mov R9, #0
     bl bubbleSort
 
     b endProgram
@@ -116,6 +116,18 @@ restartCheck
     b checkIfBelowMaxAndPrime
 
 bubbleSort
+    cmp R9, R1
+    bxge LR
+
+    push {LR}
+    ldr R4, =UNORDERED_PRIME_NUMBERS
+    bl bubbleSortPass
+    pop {LR}
+
+    add R9, #1
+    b bubbleSort
+
+bubbleSortPass
     ldrb R6, [R4], #1 ; Load R4 into memory
     ldrb R7, [R4]     ; Load next value
 
@@ -127,7 +139,7 @@ bubbleSort
     blhi invertPositions ; If R6 > R7, should invert
     pop {LR}
 
-    b bubbleSort
+    b bubbleSortPass
 
 invertPositions
     mov R8, R6 ; Save to temporary reg
