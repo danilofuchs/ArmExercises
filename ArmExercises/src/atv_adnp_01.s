@@ -54,6 +54,9 @@ PrimeNumbersList
     ; R3 = Divider testing R3's divisibility (div)
     ; R4 = Current address of number under test
     ; R5 = Next memory address to save numbers
+	mov  R1, #0x0000
+	movt R1, #0xFFFF
+	bics R0, R1, #0xFF00FF00
 	mov R0, #RAM_INITIAL_ADDR
     mov R1, #0
     mov R3, #2
