@@ -56,22 +56,23 @@ Start
 	BL PLL_Init                  ;Chama a subrotina para alterar o clock do microcontrolador para 80MHz
 	BL SysTick_Init              ;Chama a subrotina para inicializar o SysTick
 	BL GPIO_Init                 ;Chama a subrotina que inicializa os GPIO
-	MOV R9, #MODE_PASSEIO_CAVALEIROS		; R9 = MODE_SELECT
-	MOV R10, #1000		 					; R10 = SPEED (ms)
-	MOV R11, #2_00000000		 			; R11 = STATE PASSEIO CAVALEIROS
+	MOV R8, #MODE_PASSEIO_CAVALEIROS		; R8 = MODE_SELECT
+	MOV R9, #1000		 					; R9 = SPEED (ms)
+	MOV R10, #0		 					    ; R10 = PASSEIO CAVALEIROS ASCENDING?
+	MOV R11, #2_1000		 				; R11 = STATE PASSEIO CAVALEIROS
 
 MainLoop
 ; ****************************************
 ; Escrever código que lê o estado da chave, se ela estiver desativada apaga o LED
 ; Se estivar ativada chama a subrotina Pisca_LED
 ; ****************************************
+
+	MOV R0, R11
+	BL Display_LED
+	BL Set_New_State
+	BL Wait_ms
 	; BL Read_Button
 
-	MOV R0, #2_1010
-	BL Display_LED
-
-	; BL Wait_1000ms
-	; BL Flip_LED_If_Button_Pressed
 	B MainLoop
 
 ;--------------------------------------------------------------------------------
@@ -90,8 +91,10 @@ Display_LED
 	AND R1, R1, R0 ; Get info from first 2 bits
 	LSR R1, R1, #2 ; Shift these two bits from 3, 2 -> 1, 0
 
-	MOV R0, R1 	; Display result in port N via R0
+	PUSH {R0}		; Avoid overriding input
+	MOV R0, R1 		; Display result in port N via R0
 	BL PortN_Output
+	POP {R0}
 
 	MOV R2, #2_00000000
 
@@ -103,18 +106,78 @@ Display_LED
 	
 	MOV R1, #2_00000001 	; MASK -> Get bit 0
 	AND R1, R1, R0 			; Get info from bit 0
-	ORR R2, R1				; Set PF0 = R0[0]
+	ORR R2, R1, R2			; Set PF0 = R0[0]
 
-	MOV R0, R2 	; Display result in port F via R0
+	PUSH {R0} 		; Avoid overriding input
+	MOV R0, R2 		; Display result in port F via R0
 	BL PortF_Output
+	POP {R0}
 
 	POP {LR}
 	BX LR
 
-Wait_1000ms
+Set_New_State
 	PUSH {LR}
 
-	MOV R0, #1000 ; Wait for 1000ms
+	MOV R0, #MODE_PASSEIO_CAVALEIROS
+	CMP R8, R0
+	BLEQ Cavaleiros
+	
+	POP {LR}
+	BX LR
+
+Cavaleiros
+	PUSH {LR}
+
+	CMP R10, #1
+	BLEQ Cavaleiros_Ascending
+	BLNE Cavaleiros_Descending
+
+	POP {LR}
+	BX LR
+
+Cavaleiros_Ascending
+	CMP R11, #2_0001
+	ITT EQ
+		MOVEQ R11, #2_0010
+		BXEQ LR
+		
+	CMP R11, #2_0010
+	IT EQ
+		MOVEQ R11, #2_0100
+		BXEQ LR
+	
+	CMP R11, #2_0100
+	ITTT EQ
+		MOVEQ R11, #2_1000
+		MOVEQ R10, #0 ; End of iteration, change to descending
+		BXEQ LR
+	
+	BX LR
+
+Cavaleiros_Descending
+	CMP R11, #2_1000
+	ITT EQ
+		MOVEQ R11, #2_0100
+		BXEQ LR
+
+	CMP R11, #2_0100
+	ITT EQ
+		MOVEQ R11, #2_0010
+		BXEQ LR
+
+	CMP R11, #2_0010
+	ITTT EQ
+		MOVEQ R11, #2_0001
+		MOVEQ R10, #1 ; End of iteration, change to ascending
+		BXEQ LR
+	
+	BX LR
+
+Wait_ms
+	PUSH {LR}
+
+	MOV R0, R9 ; Wait for SPEED
 	BL SysTick_Wait1ms
 
 	POP {LR}
