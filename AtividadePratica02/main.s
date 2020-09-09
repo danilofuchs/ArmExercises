@@ -43,8 +43,12 @@
 		IMPORT  SysTick_Wait1ms			
 		IMPORT  GPIO_Init
         IMPORT  PortN_Output
+        IMPORT  PortF_Output	
         IMPORT  PortJ_Input	
 
+
+MODE_PASSEIO_CAVALEIROS EQU 0x0
+MODE_BINARY_COUNTER EQU 0x1
 
 ; -------------------------------------------------------------------------------
 ; Função main()
@@ -52,33 +56,57 @@ Start
 	BL PLL_Init                  ;Chama a subrotina para alterar o clock do microcontrolador para 80MHz
 	BL SysTick_Init              ;Chama a subrotina para inicializar o SysTick
 	BL GPIO_Init                 ;Chama a subrotina que inicializa os GPIO
-	MOV R10, #2_00000000		 ; Estado inicial das portas N
+	MOV R9, #MODE_PASSEIO_CAVALEIROS		; R9 = MODE_SELECT
+	MOV R10, #1000		 					; R10 = SPEED (ms)
+	MOV R11, #2_00000000		 			; R11 = STATE PASSEIO CAVALEIROS
 
 MainLoop
 ; ****************************************
 ; Escrever código que lê o estado da chave, se ela estiver desativada apaga o LED
 ; Se estivar ativada chama a subrotina Pisca_LED
 ; ****************************************
+	; BL Read_Button
+
+	MOV R0, #2_1010
 	BL Display_LED
-	BL Wait_1000ms
-	BL Read_Button
-	BL Flip_LED_If_Button_Pressed
+
+	; BL Wait_1000ms
+	; BL Flip_LED_If_Button_Pressed
 	B MainLoop
 
 ;--------------------------------------------------------------------------------
 ; Função Display_LED
-; Parâmetro de entrada: Não tem
+; Parâmetro de entrada: R0: 4-bit data to be displayed
 ; Parâmetro de saída: Não tem
 Display_LED
-; ****************************************
-; Escrever função que acende o LED, espera 1 segundo, apaga o LED e espera 1 s
-; Esta função deve chamar a rotina SysTick_Wait1ms com o parâmetro de entrada em R0
-; ****************************************
-
 	PUSH {LR}
 
-	MOV R0, R10 ; Display onto port N via R0
+	; R0[3] => PN1
+	; R0[2] => PN0
+	; R0[1] => PF4
+	; R0[0] => PF0
+
+	MOV R1, #2_00001100 ; MASK -> Get 3, 2
+	AND R1, R1, R0 ; Get info from first 2 bits
+	LSR R1, R1, #2 ; Shift these two bits from 3, 2 -> 1, 0
+
+	MOV R0, R1 	; Display result in port N via R0
 	BL PortN_Output
+
+	MOV R2, #2_00000000
+
+	MOV R1, #2_00000010 	; MASK -> Get bit 1
+	AND R1, R1, R0 			; Get info from bit 1
+	CMP R1, #2_00000010
+	IT EQ
+		ORREQ R2, #2_00010000 ; Set PF4
+	
+	MOV R1, #2_00000001 	; MASK -> Get bit 0
+	AND R1, R1, R0 			; Get info from bit 0
+	ORR R2, R1				; Set PF0 = R0[0]
+
+	MOV R0, R2 	; Display result in port F via R0
+	BL PortF_Output
 
 	POP {LR}
 	BX LR
@@ -107,22 +135,6 @@ Read_Button
 
 	POP {LR}
 	BX LR
-
-; Args: R0 -> Is button pressed? 0 = false, 1 = true
-Flip_LED_If_Button_Pressed
-	PUSH {LR}
-
-	CMP R0, #1
-	BLEQ Flip_LED
-
-	POP {LR}
-	BX LR
-
-; Flips bit 1 of register R10
-Flip_LED
-	; Flip a single bit:
-	MOV R1, #2_00000010 ; MASK -> Flip only bit 1
-	EOR R10, R1, R10
 
 ; -------------------------------------------------------------------------------------------------------------------------
 ; Fim do Arquivo
