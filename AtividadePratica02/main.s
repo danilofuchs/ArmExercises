@@ -71,7 +71,8 @@ MainLoop
 	BL Display_LED
 	BL Set_New_State
 	BL Wait_ms
-	; BL Read_Button
+	BL Read_Buttons
+	BL Detect_Speed_Change
 
 	B MainLoop
 
@@ -132,6 +133,8 @@ Cavaleiros
 	CMP R10, #1
 	BLEQ Cavaleiros_Ascending
 	BLNE Cavaleiros_Descending
+	; CMP R10, #0 ; Compare again because flags may have been reset
+	; BLEQ Cavaleiros_Descending
 
 	POP {LR}
 	BX LR
@@ -183,22 +186,67 @@ Wait_ms
 	POP {LR}
 	BX LR
 
-; Reads button.
-; Returns R0 -> #1 if button is pressed
-Read_Button
+; Reads buttons.
+; Returns R0 -> 2_00000011 if both buttons are pressed
+Read_Buttons
 	PUSH {LR}
 
 	BL PortJ_Input
-	MOV R1, #2_00000001 ; MASK -> Only compare value of bit 0
-	AND R1, R0, R1 		; R1 = R0 AND R1
-	CMP R1, #2_00000000 ; R1 should be #0 if button is pressed
-	ITE EQ
-		MOVEQ R0, #1 ; Pressed
-		MOVNE R0, #0 ; Not Pressed
+	MOV R1, #2_00000011 ; MASK -> Only get values of bits 0 and 1
+	BIC R0, R1, R0		; R0 = R1 AND (NOT R0) -> Gets only correct values
 
 	POP {LR}
 	BX LR
 
+; Input: R0 -> 2_00000010 if speed-change button is pressed
+Detect_Speed_Change
+	PUSH {LR}
+
+	MOV R1, #2_00000010 ; MASK -> Only get value of bit 0
+	AND R1, R1, R0
+	CMP R1, #2_00000010
+	BLEQ Change_Speed
+
+	POP {LR}
+	BX LR
+
+Change_Speed
+	PUSH {LR}
+
+	BL Debounce_Buttons
+
+	POP {LR}
+
+	CMP R9, #250
+	ITT	EQ
+		MOVEQ R9, #1000
+		BXEQ LR
+
+	CMP R9, #500
+	ITT	EQ
+		MOVEQ R9, #250
+		BXEQ LR
+
+	CMP R9, #1000
+	ITT	EQ
+		MOVEQ R9, #500
+		BXEQ LR
+
+	BX LR
+
+Debounce_Buttons
+	PUSH {LR}
+
+	; B Debounce_Buttons
+	MOV R0, #100 ; Wait for 100 millis
+	BL SysTick_Wait1ms
+
+	BL Read_Buttons ; Read inputs again
+	CMP R0, #2_00000000
+	BNE Debounce_Buttons
+
+	POP {LR}
+	BX LR
 ; -------------------------------------------------------------------------------------------------------------------------
 ; Fim do Arquivo
 ; -------------------------------------------------------------------------------------------------------------------------	

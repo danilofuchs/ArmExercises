@@ -113,7 +113,7 @@ EsperaGPIO  LDR     R1, [R0]						;Lê da memória o conteúdo do endereço do regis
 ; 4. DIR para 0 se for entrada, 1 se for saída
 			; O certo era verificar os outros bits da PJ para não transformar entradas em saídas desnecessárias
             LDR     R0, =GPIO_PORTJ_AHB_DIR_R		;Carrega o R0 com o endereço do DIR para a porta J
-            MOV     R1, #0x00               		;Colocar 0 no registrador DIR para funcionar com saída
+            MOV     R1, #0x00               		;Colocar 0 no registrador DIR para funcionar como entrada
             STR     R1, [R0]						;Guarda no registrador PCTL da porta J da memória
 								
 			LDR     R0, =GPIO_PORTN_AHB_DIR_R		;Carrega o R0 com o endereço do DIR para a porta N
