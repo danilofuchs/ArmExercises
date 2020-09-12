@@ -1,10 +1,12 @@
 ; main.s
-; Desenvolvido para a placa EK-TM4C1294XL
+; Developed for board EK-TM4C1294XL
+; Danilo Fuchs
+; 19/07/2020
+
+; Template:
 ; Prof. Guilherme Peron
 ; Ver 1 19/03/2018
 ; Ver 2 26/08/2018
-; Este programa deve esperar o usuário pressionar uma chave.
-; Caso o usuário pressione uma chave, um LED deve piscar a cada 1 segundo.
 
 ; -------------------------------------------------------------------------------
         THUMB                        ; Instruções do tipo Thumb-2
@@ -56,6 +58,7 @@ Start
 	BL PLL_Init                  ;Chama a subrotina para alterar o clock do microcontrolador para 80MHz
 	BL SysTick_Init              ;Chama a subrotina para inicializar o SysTick
 	BL GPIO_Init                 ;Chama a subrotina que inicializa os GPIO
+
 	MOV R8, #MODE_PASSEIO_CAVALEIROS		; R8 = MODE_SELECT
 	MOV R9, #1000		 					; R9 = DELAY (ms)
 	MOV R10, #0		 					    ; R10 = PASSEIO CAVALEIROS ASCENDING?
@@ -63,17 +66,15 @@ Start
 	MOV R12, #2_0000		 				; R12 = STATE BINARY COUNTER
 
 MainLoop
-; ****************************************
-; Escrever código que lê o estado da chave, se ela estiver desativada apaga o LED
-; Se estivar ativada chama a subrotina Pisca_LED
-; ****************************************
-	BL Get_Current_State
-	BL Display_LED
-	BL Wait_Delay
-	BL Set_New_State
+	BL Get_Current_State 	; Loads state (R11 or R12) into R0
+	BL Display_LED			; Displays from R0
+	BL Set_New_State		; Mutates state (R11 or R12) depending on current state
+
 	BL Read_Buttons
 	BL Detect_Mode_Change
 	BL Detect_Delay_Change
+
+	BL Wait_Delay
 
 	B MainLoop
 
@@ -87,60 +88,14 @@ Get_Current_State
 	
 	BX LR
 
-; Displays 4-bit input in 4 onboard LEDs
-; Input: R0: 4-bit data to be displayed
-Display_LED
-	PUSH {LR}
-
-	; R0[3] => PN1
-	; R0[2] => PN0
-	; R0[1] => PF4
-	; R0[0] => PF0
-
-	; ==== FIRST TWO LEDs (PN1, PN0) ====
-
-	MOV R1, #2_00001100 ; MASK -> Get 3, 2
-	AND R1, R1, R0 ; Get info from first 2 bits
-	LSR R1, R1, #2 ; Shift these two bits from 3, 2 -> 1, 0
-
-	PUSH {R0}		; Avoid overriding input
-	MOV R0, R1 		; Display result in port N via R0
-	BL PortN_Output
-	POP {R0}
-
-	
-	; ==== LAST TWO LEDs (PF4, PF0) ====
-
-	MOV R2, #2_00000000 	; Ouput for pin F
-
-	MOV R1, #2_00000010 	; MASK -> Get bit 1
-	AND R1, R1, R0 			; Get info from bit 1
-	CMP R1, #2_00000010
-	IT EQ
-		ORREQ R2, #2_00010000 ; Set PF4
-	
-	MOV R1, #2_00000001 	; MASK -> Get bit 0
-	AND R1, R1, R0 			; Get info from bit 0
-	ORR R2, R1, R2			; Set PF0 = R0[0]
-
-	PUSH {R0} 		; Avoid overriding input (redundant)
-	MOV R0, R2 		; Display result in port F via R0
-	BL PortF_Output
-	POP {R0}
-
-	POP {LR}
-	BX LR
-
 ; Calculates the new desired state
 Set_New_State
 	PUSH {LR}
 
-	MOV R0, #MODE_PASSEIO_CAVALEIROS
-	CMP R8, R0
+	CMP R8, #MODE_PASSEIO_CAVALEIROS
 	BLEQ Cavaleiros_Next_State
 
-	MOV R0, #MODE_BINARY_COUNTER ; Compare again since flags may have changed
-	CMP R8, R0
+	CMP R8, #MODE_BINARY_COUNTER
 	BLEQ BinaryCounter_Next_State
 	
 	POP {LR}
@@ -208,16 +163,6 @@ BinaryCounter_Next_State
 		MOVEQ R12, #0 		; if R12 == 15, R12 = 0
 		ADDNE R12, R12, #1	; else, R12 = R12 + 1
 	
-	BX LR
-
-; Waits for DELAY (R9)
-Wait_Delay
-	PUSH {LR}
-
-	MOV R0, R9 ; Wait for DELAY
-	BL SysTick_Wait1ms
-
-	POP {LR}
 	BX LR
 
 ; Reads buttons.
@@ -305,6 +250,61 @@ Debounce_Buttons
 
 	POP {LR}
 	BX LR
+
+; Displays 4-bit input in 4 onboard LEDs
+; Input: R0: 4-bit data to be displayed
+Display_LED
+	PUSH {LR}
+
+	; R0[3] => PN1
+	; R0[2] => PN0
+	; R0[1] => PF4
+	; R0[0] => PF0
+
+	; ==== FIRST TWO LEDs (PN1, PN0) ====
+
+	MOV R1, #2_00001100 ; MASK -> Get 3, 2
+	AND R1, R1, R0 ; Get info from first 2 bits
+	LSR R1, R1, #2 ; Shift these two bits from 3, 2 -> 1, 0
+
+	PUSH {R0}		; Avoid overriding input
+	MOV R0, R1 		; Display result in port N via R0
+	BL PortN_Output
+	POP {R0}
+
+	
+	; ==== LAST TWO LEDs (PF4, PF0) ====
+
+	MOV R2, #2_00000000 	; Ouput for pin F
+
+	MOV R1, #2_00000010 	; MASK -> Get bit 1
+	AND R1, R1, R0 			; Get info from bit 1
+	CMP R1, #2_00000010
+	IT EQ
+		ORREQ R2, #2_00010000 ; Set PF4
+	
+	MOV R1, #2_00000001 	; MASK -> Get bit 0
+	AND R1, R1, R0 			; Get info from bit 0
+	ORR R2, R1, R2			; Set PF0 = R0[0]
+
+	PUSH {R0} 		; Avoid overriding input (redundant)
+	MOV R0, R2 		; Display result in port F via R0
+	BL PortF_Output
+	POP {R0}
+
+	POP {LR}
+	BX LR
+
+; Waits for DELAY (R9)
+Wait_Delay
+	PUSH {LR}
+
+	MOV R0, R9 ; Wait for DELAY
+	BL SysTick_Wait1ms
+
+	POP {LR}
+	BX LR
+
 ; -------------------------------------------------------------------------------------------------------------------------
 ; Fim do Arquivo
 ; -------------------------------------------------------------------------------------------------------------------------	
