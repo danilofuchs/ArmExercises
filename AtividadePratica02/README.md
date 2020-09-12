@@ -1,4 +1,6 @@
-https://docs.google.com/document/d/1vasdupkTGhs8_IqEbC9Gsq8SFQambaqJ7Iwu6FDsVf8/edit
+**[Vídeo](./video.mp4)**
+
+https://docs.google.com/document/d/1vasdupkTGhs8_IqEbC9Gsq8SFQambaqJ7Iwu6FDsVf8
 
 UNIVERSIDADE TECNOLÓGICA FEDERAL DO PARANÁ
 DEPARTAMENTO ACADÊMICO DE ELETRÔNICA
