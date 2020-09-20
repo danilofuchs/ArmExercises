@@ -31,6 +31,7 @@ GPIO_PORTJ_AHB_IS_R     	EQU    0x40060404
 GPIO_PORTJ_AHB_IBE_R    	EQU    0x40060408
 GPIO_PORTJ_AHB_IEV_R    	EQU    0x4006040C
 GPIO_PORTJ_AHB_ICR_R    	EQU    0x4006041C
+GPIO_PORTJ_AHB_RIS_R    	EQU    0x40060414
 GPIO_PORTJ               	EQU    2_000000100000000
 ; PORT N
 GPIO_PORTN_AHB_LOCK_R    	EQU    0x40064520
@@ -208,21 +209,23 @@ PortJ_Input
 	BX LR									;Retorno
 
 
+; Lida com interrupções em PortJ
 GPIOPortJ_Handler
 	PUSH {LR}
+
+	LDR R1, =GPIO_PORTJ_AHB_RIS_R
+	LDR R0, [R1]
+	CMP R0, #2_01
+	IT	EQ
+		MOVEQ R10, #1 ; Acender LED se J0 causou interrupção
+
+	CMP R0, #2_10
+	IT	EQ
+		MOVEQ R10, #0 ; Apagar LED se J1 causou interrupção
 
 	LDR	R1, =GPIO_PORTJ_AHB_ICR_R
 	MOV R0, #2_00000011						; Fazendo ACK dos bits 0 e 1 do PortJ
 	STR R0, [R1]
-
-	BL PortJ_Input
-	CMP R0, #2_10
-	IT	EQ
-		MOVEQ R10, #1 ; Acender LED se J0 pressionado
-
-	CMP R0, #2_11
-	IT	EQ
-		MOVEQ R10, #0 ; Apagar LED se J1 foi solto (ambos soltos)
 
 	POP {LR}
 	BX LR									;Retorno
