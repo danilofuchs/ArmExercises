@@ -150,24 +150,30 @@ EsperaGPIO  LDR     R1, [R0]						;Lê da memória o conteúdo do endereço do regis
 			MOV		R1, #2_00							; Borda única
 			STR		R1, [R0]
 
-; 11. Configurar borda de descida (botão pressionado) no registrador IEV
+; 11. Configurar bordas no registrador IEV
+			; Descida  = botão pressionado 
 			LDR 	R0, =GPIO_PORTJ_AHB_IEV_R			;Carrega o endereco de IEV da porta J
-			MOV		R1, #2_00							; Borda de descida
+			MOV		R1, #2_10							; Borda de descida em J0, subida em J1
 			STR		R1, [R0]
 
-; 12. Habilita interrupções no registrador IM
+; 12. Realizar ACK
+			LDR 	R0, =GPIO_PORTJ_AHB_ICR_R			;Carrega o endereco de ICR da porta J
+			MOV		R1, #2_11							; Limpar para J0 e J1
+			STR		R1, [R0]
+
+; 13. Habilita interrupções no registrador IM
 			LDR 	R0, =GPIO_PORTJ_AHB_IM_R			;Carrega o endereco de IEV da porta J
-			MOV		R1, #2_01							; Habilitar
+			MOV		R1, #2_11							; Habilitar interrupções em ambos os pinos
 			STR		R1, [R0]
 
 ; Interrupção 51 (PortJ)
-; 13. Setar prioridade no NVIC
+; 14. Setar prioridade no NVIC
 			LDR		R0, =NVIC_PRI12_R					; PRI12 = Interrupt 48-51 Priority
 			MOV		R1, #3								; Prioridade 3
 			LSL		R1, R1, #29							; Desloca 29 bits para esquerda já que o J é o último byte do PRI12
 			STR		R1, [R0]
 
-; 14. Habilitar interrupção do grupo no NVIC
+; 15. Habilitar interrupção do grupo no NVIC
 			LDR		R0, =NVIC_EN1_R						; EN2 = Enables interrupts 32-63
 			MOV		R1, #1								; Habilitar
 			LSL		R1, #19								; Desloca 19 bits para esquerda já que queremos editar o 51 = (32 + 19)
@@ -192,12 +198,33 @@ PortN_Output
 	STR R0, [R1]                            ;Escreve na porta N o barramento de dados dos pinos N1 e N0
 	BX LR                                   ;Retorno
 
+; -------------------------------------------------------------------------------
+; Função PortJ_Input
+; Parâmetro de entrada: Não tem
+; Parâmetro de saída: R0 --> o valor da leitura
+PortJ_Input
+	LDR	R1, =GPIO_PORTJ_AHB_DATA_R		    ;Carrega o valor do offset do data register
+	LDR R0, [R1]                            ;Lê no barramento de dados dos pinos [J1-J0]
+	BX LR									;Retorno
+
 
 GPIOPortJ_Handler
+	PUSH {LR}
+
 	LDR	R1, =GPIO_PORTJ_AHB_ICR_R
-	MOV R0, #2_00000001						; Fazendo ACK do bit 0 do PortJ
+	MOV R0, #2_00000011						; Fazendo ACK dos bits 0 e 1 do PortJ
 	STR R0, [R1]
 
+	BL PortJ_Input
+	CMP R0, #2_10
+	IT	EQ
+		MOVEQ R10, #1 ; Acender LED se J0 pressionado
+
+	CMP R0, #2_11
+	IT	EQ
+		MOVEQ R10, #0 ; Apagar LED se J1 foi solto (ambos soltos)
+
+	POP {LR}
 	BX LR									;Retorno
 
     ALIGN                           ; garante que o fim da seção está alinhada 

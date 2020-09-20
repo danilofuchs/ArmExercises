@@ -55,7 +55,7 @@ Start
 
 
 MainLoop
-	MOV R0, #2_1
+	MOV R0, R10
 	BL Display_LED
 
 	B MainLoop
