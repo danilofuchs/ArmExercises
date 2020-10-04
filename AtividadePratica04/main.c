@@ -11,8 +11,8 @@ void SysTick_Init(void);
 void SysTick_Wait1ms(uint32_t delay);
 void GPIO_Init(void);
 uint32_t PortJ_Input(void);
-void PortN_Output(uint32_t leds);
-void PortF_Output(uint32_t leds);
+void Display_Number(uint32_t number);
+void Display_Array(uint8_t arr[4]);
 void Pisca_leds(void);
 
 int main(void)
@@ -20,17 +20,10 @@ int main(void)
 	PLL_Init();
 	SysTick_Init();
 	GPIO_Init();
+
 	while (1)
 	{
-		PortF_Output(0x11);
-		PortN_Output(0x03);
+
+		Display_Array((uint8_t[4]){0, 1, 0, 1});
 	}
 }
-
-// void Pisca_leds(void)
-// {
-// 	PortN_Output(0x2);
-// 	SysTick_Wait1ms(250);
-// 	PortN_Output(0x1);
-// 	SysTick_Wait1ms(250);
-// }
