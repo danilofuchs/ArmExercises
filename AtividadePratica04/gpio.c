@@ -46,12 +46,41 @@ void GPIO_Init(void)
 	GPIO_PORTF_AHB_AFSEL_R = 0x00;
 
 	// 6. Setar os bits de DEN para habilitar I/O digital
-	GPIO_PORTJ_AHB_DEN_R = 0x03; //Bit0 e bit1
-	GPIO_PORTN_DEN_R = 0x03;	 //Bit0 e bit1
-	GPIO_PORTF_AHB_DEN_R = 0x11; //Bit0 e bit4
+	GPIO_PORTJ_AHB_DEN_R = 0x03; //	BIT0 | BIT1
+	GPIO_PORTN_DEN_R = 0x03;	 //	BIT0 | BIT1
+	GPIO_PORTF_AHB_DEN_R = 0x11; //	BIT0 | BIT4
 
 	// 7. Habilitar resistor de pull-up interno, setar PUR para 1
-	GPIO_PORTJ_AHB_PUR_R = 0x03; //Bit0 e bit1
+	GPIO_PORTJ_AHB_PUR_R = 0x03; //	BIT0 | BIT1
+
+	/** INTERRUPTS */
+
+	// 8. Desabilitar interrupções no registrador IM
+	GPIO_PORTJ_AHB_IM_R = 0x00; // Desabilita interrupções
+
+	// 9. Configurar tipo de interrupção por borda no IS
+	GPIO_PORTJ_AHB_IS_R = 0x00; // Por borda
+
+	// 10. Configurar borda única no registrador IBE
+	GPIO_PORTJ_AHB_IBE_R = 0x00; // Borda única
+
+	// 11. Configurar bordas no registrador IEV
+	GPIO_PORTJ_AHB_IEV_R = 0x00; // Borda de subida
+
+	// 12. Realizar ACK
+	GPIO_PORTJ_AHB_ICR_R = (1 << 1); // Limpar J1
+
+	// 13. Habilita interrupções no registrador IM
+	GPIO_PORTJ_AHB_IM_R = (1 << 1); // Habilitar interrupções em J1
+
+	// Interrupção 51 (PortJ)
+	// 14. Setar prioridade no NVIC
+	// PRI12 = Interrupt 48-51 Priority
+	NVIC_PRI12_R = (3 << 29); // Prioridade 3 no interrupt 51 (4o byte do pri12)
+
+	// 15. Habilitar interrupção do grupo no NVIC
+	// EN1 = Enables interrupts 32-63
+	NVIC_EN1_R = (1 << 19); // queremos editar o 51 = (32 + 19)
 }
 
 // -------------------------------------------------------------------------------
@@ -94,4 +123,15 @@ void PortF_Output(uint32_t valor)
 	//agora vamos fazer o OR com o valor recebido na função
 	temp = temp | valor;
 	GPIO_PORTF_AHB_DATA_R = temp;
+}
+
+extern uint8_t pedestrianFlag;
+
+// Função GPIOPortJ_Handler
+// Lida com interrupts no port J
+// Seta flag externa pedestrianFlag
+void GPIOPortJ_Handler(void)
+{
+	GPIO_PORTJ_AHB_ICR_R = (1 << 1); // Fazer ACK do bit 1 (J1)
+	pedestrianFlag = 1;
 }

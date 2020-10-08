@@ -26,11 +26,15 @@ typedef enum State
 	S2Yellow,
 	BothRedBeforeS1Green,
 	S1Green,
-	S1Yellow
+	S1Yellow,
+	Pedestrian
 } State;
 
 void performStateActions(State state);
 State performStateTransitions(State state);
+
+// === Global variables ===
+uint8_t pedestrianFlag = 0;
 
 // ===  Main ===
 int main(void)
@@ -76,6 +80,28 @@ void performStateActions(State state)
 		Display_Array((uint8_t[4]){0, 1, 1, 1});
 		SysTick_Wait1ms(2000);
 		break;
+	case Pedestrian:
+		Display_Array((uint8_t[4]){0, 1, 0, 1});
+		SysTick_Wait1ms(500);
+		Display_Array((uint8_t[4]){1, 0, 1, 0});
+		SysTick_Wait1ms(500);
+		Display_Array((uint8_t[4]){0, 1, 0, 1});
+		SysTick_Wait1ms(500);
+		Display_Array((uint8_t[4]){1, 0, 1, 0});
+		SysTick_Wait1ms(500);
+		Display_Array((uint8_t[4]){0, 1, 0, 1});
+		SysTick_Wait1ms(500);
+		Display_Array((uint8_t[4]){1, 0, 1, 0});
+		SysTick_Wait1ms(500);
+		Display_Array((uint8_t[4]){0, 1, 0, 1});
+		SysTick_Wait1ms(500);
+		Display_Array((uint8_t[4]){1, 0, 1, 0});
+		SysTick_Wait1ms(500);
+		Display_Array((uint8_t[4]){0, 1, 0, 1});
+		SysTick_Wait1ms(500);
+		Display_Array((uint8_t[4]){1, 0, 1, 0});
+		SysTick_Wait1ms(500);
+		break;
 	}
 }
 
@@ -84,6 +110,11 @@ State performStateTransitions(State state)
 	switch (state)
 	{
 	case BothRedBeforeS2Green:
+		if (pedestrianFlag == 1)
+		{
+			pedestrianFlag = 0;
+			return Pedestrian;
+		}
 		return S2Green;
 	case S2Green:
 		return S2Yellow;
@@ -95,6 +126,8 @@ State performStateTransitions(State state)
 		return S1Yellow;
 	case S1Yellow:
 		return BothRedBeforeS2Green;
+	case Pedestrian:
+		return S2Green;
 	}
 	return BothRedBeforeS2Green;
 }
