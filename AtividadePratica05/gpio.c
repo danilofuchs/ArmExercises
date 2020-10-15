@@ -68,10 +68,10 @@ void GPIO_Init(void)
 	GPIO_PORTJ_AHB_IEV_R = 0x00; // Borda de subida
 
 	// 12. Realizar ACK
-	GPIO_PORTJ_AHB_ICR_R = (1 << 1); // Limpar J1
+	GPIO_PORTJ_AHB_ICR_R = (1 << 0); // Limpar J0
 
 	// 13. Habilita interrupções no registrador IM
-	GPIO_PORTJ_AHB_IM_R = (1 << 1); // Habilitar interrupções em J1
+	GPIO_PORTJ_AHB_IM_R = (1 << 0); // Habilitar interrupções em J0
 
 	// Interrupção 51 (PortJ)
 	// 14. Setar prioridade no NVIC
@@ -185,7 +185,7 @@ extern uint8_t timerToggle;
 // Seta flag externa timerEnabled
 void GPIOPortJ_Handler(void)
 {
-	GPIO_PORTJ_AHB_ICR_R = (1 << 1); // Fazer ACK do bit 1 (J1)
+	GPIO_PORTJ_AHB_ICR_R = (1 << 0); // Fazer ACK do bit 0 (J0)
 	timerToggle = !timerToggle;
 }
 
@@ -196,7 +196,7 @@ extern uint8_t ledOn;
 // Seta flag externa timedOut
 void Timer2A_Handler(void)
 {
-	TIMER2_ICR_R = (1 << 0); // Fazer ACK do timer no bit TATOCINT
+	TIMER2_ICR_R = (1 << 0); // Fazer ACK do timer (bit 0)
 	ledOn = !ledOn;
 }
 
