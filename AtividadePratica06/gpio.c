@@ -7,8 +7,9 @@
 
 #include "tm4c1294ncpdt.h"
 
-#define GPIO_PORTN (0x1000) //bit 12  2_001000000000000
-#define GPIO_PORTF (0x0020) //bit 5   2_000000000100000
+#define GPIO_PORTN (1 << 12) //bit 12  2_001000000000000
+#define GPIO_PORTF (1 << 5)	 //bit 5   2_000000000100000
+#define GPIO_PORTA (1 << 0)	 //bit 0   2_000000000000001
 
 // -------------------------------------------------------------------------------
 // Função GPIO_Init
@@ -96,6 +97,77 @@ void GPIO_Init(void)
 
 	// 9. Habilitar o bit TAEN no registrador GPTMCTL para começar o timer.
 	// TIMER2_CTL_R = 0x1; // Timer ligado
+
+	/** UART */
+	// 1. Habilitar o clock no módulo UART no registrador
+	// 		RCGCUART (cada bit representa uma UART)
+	uint8_t enabledUarts = (1 << 0); // Ativar UART 0
+	SYSCTL_RCGCUART_R = enabledUarts;
+
+	// 		esperar até que a respectiva UART esteja pronta
+	// para ser acessada no registrador PRUART (cada
+	// bit representa uma UART).
+	while ((SYSCTL_PRUART_R & enabledUarts) != enabledUarts)
+	{
+	};
+
+	// 2. Garantir que a UART esteja desabilitada antes de
+	// 		fazer as alterações (limpar o bit UARTEN) no
+	// 		registrador UARTCTL (Control).
+	UART0_CTL_R = 0x0; // Desabilitar UART
+
+	// 3. Escrever o baud-rate nos registradores
+	//		UARTIBRD e UARTFBRD
+
+	// baud rate = 9600 bps
+	// freq = 80MHz
+	// BRD = 80000000/(16*9600) = 520,833333
+	// UARTIBRD = 520
+	// UARTFBRD = int(BFDF*64 + 0.5) = 0,833333*64 + 0,5 = 53,83 = 53
+	UART0_IBRD_R = 520;
+	UART0_FBRD_R = 53;
+
+	// 4. Configurar o registrador UARTLCRH para o
+	// 		número de bits, paridade, stop bits e fila
+	UART0_LCRH_R = (3 << 5) | (1 << 4); // 8-bit, filas habilitadas e paridade impar habilitada
+
+	// 5. Garantir que a fonte de clock seja o clock do
+	// 		sistema no registrador UARTCC escrevendo 0
+	// 		(ou escolher qualquer uma das outras fontes de
+	// 		clock)
+	UART0_CC_R = 0x0; // System clock (80 MHz)
+
+	// 6. Habilitar as flags RXE, TXE e UARTEN no
+	// 		registrador UARTCTL (habilitar a recepção,
+	// 		transmissão e a UART)
+	UART0_CTL_R = (1 << 9) | (1 << 8) | (1 << 0); // Habilita RX, TX e UART
+
+	// 7. Habilitar o clock no módulo GPIO no registrador
+	// 		RCGGPIO (cada bit representa uma GPIO) e
+	// 		esperar até que a respectiva GPIO esteja pronta
+	// 		para ser acessada no registrador PRGPIO (cada
+	// 		bit representa uma GPIO).
+	SYSCTL_RCGCGPIO_R |= GPIO_PORTA;
+	while (SYSCTL_RCGCGPIO_R & GPIO_PORTA != GPIO_PORTA)
+	{
+	}
+
+	// 8. Desabilitar a funcionalidade analógica no
+	//		registrador GPIOAMSEL.
+	GPIO_PORTA_AHB_AMSEL_R = 0x0;
+
+	// 9. Escolher a função alternativa dos pinos
+	//		respectivos TX e RX no registrador GPIOPCTL
+	GPIO_PORTA_AHB_PCTL_R = (1 << 4) | (1 << 0); // Função UART RX e TX nos pinos A1 e A0
+
+	// 	10. Habilitar os bits de função alternativa no
+	// 		registrador GPIOAFSEL nos pinos respectivos à
+	//		UART.
+	GPIO_PORTA_AHB_AFSEL_R = (1 << 1) | (1 << 0); // Habilita função alternativa em A1 e A0
+
+	// 	11. Configurar os pinos como digitais no registrador
+	// 		GPIODEN.
+	GPIO_PORTA_AHB_DEN_R = (1 << 1) | (1 << 0); // Funções digitais em A1 e A0
 }
 
 // -------------------------------------------------------------------------------
@@ -172,4 +244,43 @@ void initPWM(void)
 	ledOn = 1;
 	TIMER2_TAILR_R = highTicks;
 	TIMER2_CTL_R = 1;
+}
+
+uint8_t hasItemsToReceive(void)
+{
+	// Fifo Empty
+	if ((UART0_FR_R & UART_FR_RXFE) == UART_FR_RXFE)
+	{
+		return 0;
+	}
+	return 1;
+}
+
+uint8_t inChar(void)
+{
+	// if ((UART0_FR_R & UART_FR_RXFE) == 0x0)
+	// {
+	// 	uint8_t asd = (uint8_t)(UART0_DR_R & 0xFF);
+	// 	return asd;
+	// }
+	// return 0;
+	while ((UART0_FR_R & UART_FR_RXFE) != 0)
+	{
+	};
+	return ((uint8_t)(UART0_DR_R & 0xFF));
+}
+
+uint8_t canTransmit(void)
+{
+	// FIFO Full
+	if ((UART0_FR_R & UART_FR_TXFF) == UART_FR_TXFF)
+	{
+		return 0;
+	}
+	return 1;
+}
+
+void outChar(uint32_t item)
+{
+	UART0_DR_R = item;
 }
