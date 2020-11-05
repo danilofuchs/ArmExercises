@@ -256,11 +256,20 @@ uint8_t inChar(void)
 	return UART0_DR_R;
 }
 
-void outChar(uint32_t data)
+void outChar(uint8_t data)
 {
 	while ((UART0_FR_R & UART_FR_TXFF) != 0)
 	{
 	};
 
 	UART0_DR_R = data;
+}
+
+void outString(char *ptr)
+{
+	while (*ptr != '\0')
+	{
+		outChar((uint8_t)*ptr);
+		ptr++;
+	}
 }

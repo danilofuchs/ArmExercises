@@ -1,6 +1,7 @@
 {
   "files.associations": {
-    "*.s": "arm"
+    "*.s": "arm",
+    "string": "c"
   },
   "files.encoding": "iso885915"
 }
