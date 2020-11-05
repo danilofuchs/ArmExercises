@@ -1,8 +1,15 @@
 // main.c
 // Desenvolvido para a placa EK-TM4C1294XL
-// Um timer com período de 700ms pisca um LED
-// periodicamente através de interrupções.
-// Cliques no botão SW1 ativam/desativam o timer
+// LED na porta N1 acende com diferentes níveis de brilho
+// Controlado por porta serial
+// UART com baud rate de 9600
+// Comandos reconhecidos:
+// 		0 -> LED a 1%
+// 		1 -> LED a 20%
+// 		2 -> LED a 40%
+// 		3 -> LED a 60%
+// 		4 -> LED a 80%
+// 		5 -> LED a 99%
 //
 // Danilo Fuchs
 
@@ -11,9 +18,8 @@
 
 // === Imported prototypes ===
 void PLL_Init(void);
-void SysTick_Init(void);
-void SysTick_Wait1ms(uint32_t delay);
 void GPIO_Init(void);
+
 void setDutyCycle(uint8_t dutyCycle);
 void initPWM(void);
 
@@ -24,19 +30,15 @@ void outString(char *ptr);
 
 // ===  Local prototypes ===
 void printChange(uint8_t percentage);
-
-// === Global variables ===
-uint8_t ledOn = 0;
+void printStart(uint8_t percentage);
 
 // ===  Main ===
 int main(void)
 {
 	PLL_Init();
-	SysTick_Init();
 	GPIO_Init();
-	
-	outString("\r\nStart 1%%");
 
+	printStart(1);
 	setDutyCycle(1);
 	initPWM();
 
@@ -73,6 +75,15 @@ int main(void)
 			break;
 		}
 	}
+}
+
+void printStart(uint8_t percentage)
+{
+	char str[16];
+
+	sprintf(str, "\r\nStart %2d%%", percentage);
+
+	outString(str);
 }
 
 void printChange(uint8_t percentage)

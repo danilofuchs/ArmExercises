@@ -186,23 +186,7 @@ void PortN_Output(uint32_t valor)
 	GPIO_PORTN_DATA_R = temp;
 }
 
-// -------------------------------------------------------------------------------
-// Função PortF_Output
-// Escreve os valores no port F
-// Parâmetro de entrada: Valor a ser escrito
-// Parâmetro de saída: não tem
-void PortF_Output(uint32_t valor)
-{
-	uint32_t temp;
-	//vamos zerar somente os bits menos significativos
-	//para uma escrita amigável nos bits 0 e 4
-	temp = GPIO_PORTF_AHB_DATA_R & (~0x11);
-	//agora vamos fazer o OR com o valor recebido na função
-	temp = temp | valor;
-	GPIO_PORTF_AHB_DATA_R = temp;
-}
-
-extern uint8_t ledOn;
+uint8_t ledOn = 0;
 
 uint32_t highTicks = 0;
 uint32_t lowTicks = 0;
