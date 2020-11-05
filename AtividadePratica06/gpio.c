@@ -217,11 +217,13 @@ void Timer2A_Handler(void)
 	if (ledOn)
 	{
 		ledOn = 0;
+		PortN_Output(0x0);
 		TIMER2_TAILR_R = lowTicks;
 	}
 	else
 	{
 		ledOn = 1;
+		PortN_Output(1 << 1);
 		TIMER2_TAILR_R = highTicks;
 	}
 
@@ -246,41 +248,19 @@ void initPWM(void)
 	TIMER2_CTL_R = 1;
 }
 
-uint8_t hasItemsToReceive(void)
-{
-	// Fifo Empty
-	if ((UART0_FR_R & UART_FR_RXFE) == UART_FR_RXFE)
-	{
-		return 0;
-	}
-	return 1;
-}
-
 uint8_t inChar(void)
 {
-	// if ((UART0_FR_R & UART_FR_RXFE) == 0x0)
-	// {
-	// 	uint8_t asd = (uint8_t)(UART0_DR_R & 0xFF);
-	// 	return asd;
-	// }
-	// return 0;
 	while ((UART0_FR_R & UART_FR_RXFE) != 0)
 	{
 	};
-	return ((uint8_t)(UART0_DR_R & 0xFF));
+	return UART0_DR_R;
 }
 
-uint8_t canTransmit(void)
+void outChar(uint32_t data)
 {
-	// FIFO Full
-	if ((UART0_FR_R & UART_FR_TXFF) == UART_FR_TXFF)
+	while ((UART0_FR_R & UART_FR_TXFF) != 0)
 	{
-		return 0;
-	}
-	return 1;
-}
+	};
 
-void outChar(uint32_t item)
-{
-	UART0_DR_R = item;
+	UART0_DR_R = data;
 }

@@ -18,10 +18,7 @@ void initPWM(void);
 
 void Display_Array(uint8_t arr[4]);
 
-uint8_t hasItemsToReceive(void);
 uint8_t inChar(void);
-
-uint8_t canTransmit(void);
 void outChar(uint8_t item);
 
 // ===  Local prototypes ===
@@ -36,38 +33,34 @@ int main(void)
 	SysTick_Init();
 	GPIO_Init();
 
-	// setDutyCycle(50);
-	// initPWM();
-
-	// outChar('a');
-	// outChar('b');
-	// outChar('c');
-	// outChar('1');
-	// outChar('2');
-	// outChar('3');
+	setDutyCycle(1);
+	initPWM();
 
 	while (1)
 	{
-
-		// if (hasItemsToReceive())
-		// {
 		uint8_t character = inChar();
-		if (character == '1')
+		switch (character)
 		{
-			Display_Array((uint8_t[4]){1, 0, 0, 0});
+		case '0':
+			setDutyCycle(1);
+			break;
+		case '1':
+			setDutyCycle(20);
+			break;
+		case '2':
+			setDutyCycle(40);
+			break;
+		case '3':
+			setDutyCycle(60);
+			break;
+		case '4':
+			setDutyCycle(80);
+			break;
+		case '5':
+			setDutyCycle(99);
+			break;
+		default:
+			break;
 		}
-		else
-		{
-			Display_Array((uint8_t[4]){0, 0, 0, 0});
-		}
-		// }
-		// if (ledOn)
-		// {
-		// 	Display_Array((uint8_t[4]){1, 0, 0, 0});
-		// }
-		// else
-		// {
-		// 	Display_Array((uint8_t[4]){0, 0, 0, 0});
-		// }
 	}
 }
