@@ -228,6 +228,7 @@ void setDutyCycle(uint8_t dutyCycle)
 void initPWM(void)
 {
 	ledOn = 1;
+	PortN_Output(1 << 1);
 	TIMER2_TAILR_R = highTicks;
 	TIMER2_CTL_R = 1;
 }
