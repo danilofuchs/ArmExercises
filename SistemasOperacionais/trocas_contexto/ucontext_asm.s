@@ -152,7 +152,7 @@ swap_context_asm:
 	CMP  r0 , #0
 	BNE  inicializado1
 
-    ; ainda não inicializado
+    ; ainda n�o inicializado
     mov  r0,   #1
 	STR  r0 ,  [r1 ,#ucontext_t_initialized]
 	;LDR	 r1 ,  [r1 ,#mcontext_t_regR1]

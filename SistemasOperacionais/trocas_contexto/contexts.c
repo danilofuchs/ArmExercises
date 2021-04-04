@@ -1,16 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <ucontext.h>
-#include <stdint.h>
-#include "utils/uartstdio.h"
+#include "ucontext.h"
 
 // operating system check
 #if defined(_WIN32) || (!defined(__unix__) && !defined(__unix) && (!defined(__APPLE__) || !defined(__MACH__)))
 #warning Este codigo foi planejado para ambientes UNIX (LInux, *BSD, MacOS). A compilacao e execucao em outros ambientes e responsabilidade do usuario.
 #endif
 
-//#define STACKSIZE 32768		/* tamanho de pilha das threads */
-#define STACKSIZE 256     /* tamanho de pilha das threads */
+#define STACKSIZE 4096    /* tamanho de pilha das threads */
 #define _XOPEN_SOURCE 600 /* para compilar no MacOS */
 
 ucontext_t ContextPing, ContextPong, ContextMain;
@@ -64,6 +61,9 @@ void contexts(void)
 
    UARTprintf("Main INICIO\n");
 
+   get_context_asm(&ContextMain);
+   makecontextMain(&ContextMain, (int)(*contexts), 1, "        contexts");
+
    get_context_asm(&ContextPing);
 
    stack = malloc(10);
@@ -77,7 +77,6 @@ void contexts(void)
    else
    {
       perror("Erro na criação da pilha: ");
-      //      exit (1);
    }
 
    makecontext(&ContextPing, (int)(*BodyPing), 1, "    Ping");
@@ -95,7 +94,6 @@ void contexts(void)
    else
    {
       perror("Erro na criação da pilha: ");
-      //      exit (1);
    }
 
    makecontext(&ContextPong, (int)(*BodyPong), 1, "        Pong");
@@ -103,8 +101,7 @@ void contexts(void)
    swap_context_asm(&ContextMain, &ContextPing);
    swap_context_asm(&ContextMain, &ContextPong);
 
-   UARTprintf("Main FIM\n");
+   // printf("Main FIM\n");
 
-   //   exit (0);
    return;
 }

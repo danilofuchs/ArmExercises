@@ -2,7 +2,7 @@
 //
 // hello.c - Simple hello world example.
 //
-// Copyright (c) 2013-2020 Texas Instruments Incorporated.  All rights reserved.
+// Copyright (c) 2013-2017 Texas Instruments Incorporated.  All rights reserved.
 // Software License Agreement
 //
 // Texas Instruments (TI) is supplying this software for use solely and
@@ -18,12 +18,13 @@
 // CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
 // DAMAGES, FOR ANY REASON WHATSOEVER.
 //
-// This is part of revision 2.2.0.295 of the EK-TM4C1294XL Firmware Package.
+// This is part of revision 2.1.4.178 of the EK-TM4C1294XL Firmware Package.
 //
 //*****************************************************************************
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "ucontext.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_types.h"
 #include "driverlib/gpio.h"
@@ -75,19 +76,19 @@ void ConfigureUART(void)
     //
     // Enable the GPIO Peripheral used by the UART.
     //
-    MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
+    ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
 
     //
     // Enable UART0
     //
-    MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);
+    ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);
 
     //
     // Configure GPIO Pins for UART mode.
     //
-    MAP_GPIOPinConfigure(GPIO_PA0_U0RX);
-    MAP_GPIOPinConfigure(GPIO_PA1_U0TX);
-    MAP_GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
+    ROM_GPIOPinConfigure(GPIO_PA0_U0RX);
+    ROM_GPIOPinConfigure(GPIO_PA1_U0TX);
+    ROM_GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
 
     //
     // Initialize the UART for console I/O.
@@ -104,13 +105,10 @@ int main(void)
 {
     //
     // Run from the PLL at 120 MHz.
-    // Note: SYSCTL_CFG_VCO_240 is a new setting provided in TivaWare 2.2.x and
-    // later to better reflect the actual VCO speed due to SYSCTL#22.
     //
     g_ui32SysClock = MAP_SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ |
-                                             SYSCTL_OSC_MAIN |
-                                             SYSCTL_USE_PLL |
-                                             SYSCTL_CFG_VCO_240),
+                                             SYSCTL_OSC_MAIN | SYSCTL_USE_PLL |
+                                             SYSCTL_CFG_VCO_480),
                                             120000000);
 
     //
@@ -121,7 +119,7 @@ int main(void)
     //
     // Enable the GPIO pins for the LED D1 (PN1).
     //
-    MAP_GPIOPinTypeGPIOOutput(GPIO_PORTN_BASE, GPIO_PIN_1);
+    ROM_GPIOPinTypeGPIOOutput(GPIO_PORTN_BASE, GPIO_PIN_1);
 
     //
     // Initialize the UART.
