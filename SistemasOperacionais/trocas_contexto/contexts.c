@@ -10,7 +10,7 @@
 #endif
 
 //#define STACKSIZE 32768		/* tamanho de pilha das threads */
-#define STACKSIZE 4096    /* tamanho de pilha das threads */
+#define STACKSIZE 256     /* tamanho de pilha das threads */
 #define _XOPEN_SOURCE 600 /* para compilar no MacOS */
 
 ucontext_t ContextPing, ContextPong, ContextMain;
