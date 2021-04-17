@@ -66,7 +66,7 @@ void contexts(void)
 
    get_context_asm(&ContextPing);
 
-   stack = malloc(10);
+   stack = malloc(STACKSIZE);
    if (stack)
    {
       ContextPing.uc_stack.ss_sp = stack;
