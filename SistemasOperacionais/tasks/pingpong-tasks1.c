@@ -4,8 +4,6 @@
 
 // Teste da gestão básica de tarefas
 
-#include <stdio.h>
-#include <stdlib.h>
 #include "ppos.h"
 #include "libraries/debug.h"
 #include "utils/uartstdio.h"

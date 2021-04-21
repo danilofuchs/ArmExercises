@@ -1,30 +1,30 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
+#include <stdint.h>
 #include "ppos.h"
 #include "libraries/debug.h"
 
 #define STACKSIZE 128 /* tamanho de pilha das threads */
 
-int task_id_counter;
+uint32_t task_id_counter = 1;
 task_t main_task;
 task_t *current_task = NULL;
 
 // funções gerais ==============================================================
 
 // Inicializa o sistema operacional; deve ser chamada no inicio do main()
-void ppos_init(task_t *task)
+void ppos_init()
 {
     debug_fn_start("ppos_init");
 
     /* desativa o buffer da saida padrao (stdout), usado pela função printf */
     setvbuf(stdout, 0, _IONBF, 0);
 
-    getcontext(&(main_task.context));
     main_task.id = 0;
+    main_task.context.initialized = 1;
+    getcontext(&(main_task.context));
     current_task = &main_task;
-
-    task_id_counter = 1;
 
     debug_fn_return(NULL);
 }
@@ -82,6 +82,7 @@ void task_exit(int exitCode)
 // alterna a execução para a tarefa indicada
 int task_switch(task_t *task)
 {
+    // asm(" MOV R7, LR\n");
     task_t *previous = current_task;
     debug_fn_start("task_switch");
 

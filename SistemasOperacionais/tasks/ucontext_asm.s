@@ -34,7 +34,7 @@ ucontext_t_initialized .set 24 * 4
 get_context_asm:
 
 ;	push     {lr}
-	str.w       r0,  [r0,#mcontext_t_regR0]
+	str       r0,  [r0,#mcontext_t_regR0]
 	str.w       r1,  [r0,#mcontext_t_regR1]
 	str.w       r2,  [r0,#mcontext_t_regR2]
 	str.w       r3,  [r0,#mcontext_t_regR3]
@@ -100,7 +100,7 @@ inicializado:
     LDR  r15,  [r0 ,#mcontext_t_regR14]
 ;	pop     {pc}
     bx     lr
-;	.end
+
 ;////////////////////////  SWAP BEG /////////////////////
 ;;;;;;;;;;;;;;;;;;;;;;;;;  SWAP BEG ;;;;;;;;;;;;;;;;;;;;;.global swap_context_asm
     .global    swap_context_asm
@@ -168,13 +168,9 @@ inicializado1:
     LDR  r0 ,  [r1 ,#mcontext_t_regR0] ;21_09_2017//
     LDR  r15,  [r1 ,#mcontext_t_regR14]
 ;	pop     {pc}
-    bx     lr
+    bx     lr ; r7
 
 ;;;;;;;;;;;;;;;;;  SWAP END ;;;;;;;;;;;;;;;;;;;
-	.global	 change_add_asm
-change_add_asm:
-	add sp, #40
-	str r0, [sp]
-	sub sp, #40
-	bx  lr
 
+.align
+.end
