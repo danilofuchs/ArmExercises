@@ -14,11 +14,6 @@
 // habilita compatibilidade POSIX no MacOS X (para ucontext.h)
 #define _XOPEN_SOURCE 600
 
-// este código deve ser compilado em sistemas UNIX-like
-#if defined(_WIN32) || (!defined(__unix__) && !defined(__unix) && (!defined(__APPLE__) || !defined(__MACH__)))
-#warning Este codigo foi planejado para ambientes UNIX (LInux, *BSD, MacOS). A compilacao e execucao em outros ambientes e responsabilidade do usuario.
-#endif
-
 // otimizações podem atrapalhar código que manipula contexto
 #ifdef __OPTIMIZE__
 #error "Please do not use optimizations (-O1, -O2, ...)"

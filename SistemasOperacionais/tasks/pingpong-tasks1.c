@@ -10,7 +10,7 @@
 #include "libraries/debug.h"
 #include "utils/uartstdio.h"
 
-task_t MainTask, Ping, Pong;
+task_t Ping, Pong;
 
 // corpo da thread Ping
 void BodyPing(void *arg)
@@ -18,13 +18,13 @@ void BodyPing(void *arg)
     int i;
     char *name = (char *)arg;
 
-    UARTprintf("%s: inicio\n", name);
+    UARTprintf("    PING%s: inicio\n", name);
     for (i = 0; i < 4; i++)
     {
-        UARTprintf("%s: %d\n", name, i);
+        UARTprintf("    PING%s: %d\n", name, i);
         task_switch(&Pong);
     }
-    UARTprintf("%s: fim\n", name);
+    UARTprintf("    PING%s: fim\n", name);
     task_exit(0);
 }
 
@@ -34,19 +34,19 @@ void BodyPong(void *arg)
     int i;
     char *name = (char *)arg;
 
-    UARTprintf("%s: inicio\n", name);
+    UARTprintf("        PONG%s: inicio\n", name);
     for (i = 0; i < 4; i++)
     {
-        UARTprintf("%s: %d\n", name, i);
+        UARTprintf("        PONG%s: %d\n", name, i);
         task_switch(&Ping);
     }
-    UARTprintf("%s: fim\n", name);
+    UARTprintf("        PONG%s: fim\n", name);
     task_exit(0);
 }
 
-int task1(void *arg)
+void task1(void *arg)
 {
-    UARTprintf("main: inicio\n");
+    UARTprintf("MAIN: inicio\n");
 
     ppos_init();
 
@@ -56,7 +56,5 @@ int task1(void *arg)
     task_switch(&Ping);
     task_switch(&Pong);
 
-    UARTprintf("main: fim\n");
-
-    exit(0);
+    UARTprintf("MAIN: fim\n");
 }

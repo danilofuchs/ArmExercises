@@ -4,9 +4,9 @@
 #include "ppos.h"
 #include "libraries/debug.h"
 
-#define STACKSIZE 4096 /* tamanho de pilha das threads */
+#define STACKSIZE 128 /* tamanho de pilha das threads */
 
-int task_id_counter;
+int task_id_counter = 0;
 task_t *main_task = NULL;
 task_t *current_task = NULL;
 
@@ -15,15 +15,12 @@ task_t *current_task = NULL;
 // Inicializa o sistema operacional; deve ser chamada no inicio do main()
 void ppos_init(task_t *task)
 {
+    debug_fn_start("ppos_init");
+
     /* desativa o buffer da saida padrao (stdout), usado pela função printf */
     setvbuf(stdout, 0, _IONBF, 0);
 
-    debug_fn_start("ppos_init");
-//
-//    task->id = 0;
-//    task_id_counter = 1;
-//    main_task = task;
-//    current_task = task;
+    current_task = main_task;
 
     debug_fn_return(NULL);
 }
@@ -40,7 +37,7 @@ int task_create(task_t *task,               // descritor da nova tarefa
 
     ucontext_t context;
 
-    if (get_context_asm(&context) == -1)
+    if (getcontext(&context) == -1)
     {
         debug_fn_return("Error (getcontext): %s", strerror(errno));
         return errno;
@@ -76,7 +73,7 @@ void task_exit(int exitCode)
 {
     debug_fn_start("task_exit");
 
-    // task_switch(main_task);
+    task_switch(main_task);
 
     debug_fn_return(NULL);
 }
@@ -89,13 +86,14 @@ int task_switch(task_t *task)
     debug_fn_step("Switching tasks: %d -> %d", current_task->id, task->id);
     debug_fn_step("Switching contexts: %p -> %p", &current_task->context, &task->context);
 
+    current_task = task;
+
     int ret = swapcontext(&(current_task->context), &(task->context));
     if (ret != 0)
     {
         debug_fn_return("Error (swapcontext): %s", strerror(errno));
         return errno;
     }
-    current_task = task;
 
     debug_fn_return("%d", 0);
     return 0;

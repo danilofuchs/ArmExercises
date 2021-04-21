@@ -4,7 +4,6 @@
 typedef struct stack_t
 {
     char *ss_sp;
-    //size_t ss_size;
     long ss_size;
     int ss_flags;
 } stack_t;
@@ -42,19 +41,12 @@ typedef struct ucontext_t
     int initialized;
 } ucontext_t;
 
-extern int get_context_asm(ucontext_t *);
+int getcontext(ucontext_t *);
 
-int set_context_asm(ucontext_t *);
+int setcontext(ucontext_t *);
 
-void makecontext(ucontext_t *context, int bodyAdress, int n_parms, char *parm);
-
-//void makecontext(ucontext_t *context, int (*body)(), int n_parms, char *parm);
-
-//void makecontext(ucontext_t *context, int (*body)(), int, char *);
-
-void setgearclock(int);
+void makecontext(ucontext_t *context, int start_routine, int n_params, char *param);
 
 int swapcontext(ucontext_t *, ucontext_t *);
-int swap_context_asm(ucontext_t *, ucontext_t *);
 
 #endif

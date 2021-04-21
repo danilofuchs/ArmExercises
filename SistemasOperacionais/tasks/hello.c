@@ -35,6 +35,7 @@
 #include "driverlib/sysctl.h"
 #include "driverlib/uart.h"
 #include "utils/uartstdio.h"
+#include "ppos.h"
 
 //*****************************************************************************
 //
@@ -96,6 +97,8 @@ void ConfigureUART(void)
     UARTStdioConfig(0, 115200, g_ui32SysClock);
 }
 
+extern void task1(void *arg);
+
 //*****************************************************************************
 //
 // Print "Hello World!" to the UART on the Intelligent UART Module.
@@ -134,7 +137,11 @@ int main(void)
     //
     // Setup finished. Run code
     //
-    task1();
+    task_t main;
+    task_create(&main, *task1, "Main");
+    main.context.initialized = 1;
+    main_task = &main;
+    task1("Main");
 
     //
     // Turn off D1.
