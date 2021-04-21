@@ -18,13 +18,13 @@ void BodyPing(void *arg)
     int i;
     char *name = (char *)arg;
 
-    UARTprintf("    PING%s: inicio\n", name);
+    UARTprintf("%s: inicio\n", name);
     for (i = 0; i < 4; i++)
     {
-        UARTprintf("    PING%s: %d\n", name, i);
+        UARTprintf("%s: %d\n", name, i);
         task_switch(&Pong);
     }
-    UARTprintf("    PING%s: fim\n", name);
+    UARTprintf("%s: fim\n", name);
     task_exit(0);
 }
 
@@ -34,13 +34,13 @@ void BodyPong(void *arg)
     int i;
     char *name = (char *)arg;
 
-    UARTprintf("        PONG%s: inicio\n", name);
+    UARTprintf("%s: inicio\n", name);
     for (i = 0; i < 4; i++)
     {
-        UARTprintf("        PONG%s: %d\n", name, i);
+        UARTprintf("%s: %d\n", name, i);
         task_switch(&Ping);
     }
-    UARTprintf("        PONG%s: fim\n", name);
+    UARTprintf("%s: fim\n", name);
     task_exit(0);
 }
 

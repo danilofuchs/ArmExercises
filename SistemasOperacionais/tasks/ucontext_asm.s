@@ -34,7 +34,7 @@ ucontext_t_initialized .set 24 * 4
 get_context_asm:
 
 ;	push     {lr}
-	str       r0,  [r0,#mcontext_t_regR0]
+	str.w       r0,  [r0,#mcontext_t_regR0]
 	str.w       r1,  [r0,#mcontext_t_regR1]
 	str.w       r2,  [r0,#mcontext_t_regR2]
 	str.w       r3,  [r0,#mcontext_t_regR3]
@@ -88,7 +88,7 @@ set_context_asm:
     mov  r1,   #1
 	STR  r1 ,  [r0 ,#ucontext_t_initialized]
 	LDR	 r1 ,  [r0 ,#mcontext_t_regR1]
-	ldr  R13,  [r0 ,#stack_t_Pss_sp]
+	LDR  r13,  [r0 ,#stack_t_Pss_sp]
     LDR  r15,  [r0 ,#ucontext_t_func]
 ;//	pop     {pc}
     bx     lr
@@ -156,9 +156,9 @@ swap_context_asm:
     mov  r0,   #1
 	STR  r0 ,  [r1 ,#ucontext_t_initialized]
 	;LDR	 r1 ,  [r1 ,#mcontext_t_regR1]
-	ldr  R13,  [r1 ,#stack_t_Pss_sp]
+	LDR  r13,  [r1 ,#stack_t_Pss_sp]
     LDR  r0 ,  [r1 ,#mcontext_t_regR0] ;21_09_2017//
-    LDR  r15,  [r1 ,#ucontext_t_func]
+    LDR  r15,  [r1 ,#ucontext_t_func];trava aqui
     bx     lr
 
 inicializado1:
@@ -171,5 +171,10 @@ inicializado1:
     bx     lr
 
 ;;;;;;;;;;;;;;;;;  SWAP END ;;;;;;;;;;;;;;;;;;;
-
+	.global	 change_add_asm
+change_add_asm:
+	add sp, #40
+	str r0, [sp]
+	sub sp, #40
+	bx  lr
 

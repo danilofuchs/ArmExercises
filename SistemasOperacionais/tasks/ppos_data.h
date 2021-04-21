@@ -19,8 +19,6 @@ typedef struct task_t
                                 // ... (outros campos serão adicionados mais tarde)
 } task_t;
 
-extern task_t *main_task;
-
 // estrutura que define um semáforo
 typedef struct
 {

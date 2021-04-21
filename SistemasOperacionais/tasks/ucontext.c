@@ -2,6 +2,7 @@
 #include "ucontext.h"
 extern set_context_asm(ucontext_t *);
 extern get_context_asm(ucontext_t *);
+extern swap_context_asm(ucontext_t *, ucontext_t *);
 
 void makecontext(ucontext_t *context, int start_routine, int n_params, char *param)
 {
@@ -11,10 +12,7 @@ void makecontext(ucontext_t *context, int start_routine, int n_params, char *par
 
 int swapcontext(ucontext_t *saida, ucontext_t *entrada)
 {
-  get_context_asm(saida);
-  set_context_asm(entrada);
-
-  return 0;
+  return swap_context_asm(saida, entrada);
 }
 
 int getcontext(ucontext_t *context)

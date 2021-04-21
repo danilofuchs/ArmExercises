@@ -137,10 +137,6 @@ int main(void)
     //
     // Setup finished. Run code
     //
-    task_t main;
-    task_create(&main, *task1, "Main");
-    main.context.initialized = 1;
-    main_task = &main;
     task1("Main");
 
     //

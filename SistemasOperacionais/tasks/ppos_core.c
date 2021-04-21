@@ -6,8 +6,8 @@
 
 #define STACKSIZE 128 /* tamanho de pilha das threads */
 
-int task_id_counter = 0;
-task_t *main_task = NULL;
+int task_id_counter;
+task_t main_task;
 task_t *current_task = NULL;
 
 // funções gerais ==============================================================
@@ -20,7 +20,11 @@ void ppos_init(task_t *task)
     /* desativa o buffer da saida padrao (stdout), usado pela função printf */
     setvbuf(stdout, 0, _IONBF, 0);
 
-    current_task = main_task;
+    getcontext(&(main_task.context));
+    main_task.id = 0;
+    current_task = &main_task;
+
+    task_id_counter = 1;
 
     debug_fn_return(NULL);
 }
@@ -35,9 +39,7 @@ int task_create(task_t *task,               // descritor da nova tarefa
 {
     debug_fn_start("task_create");
 
-    ucontext_t context;
-
-    if (getcontext(&context) == -1)
+    if (getcontext(&(task->context)) == -1)
     {
         debug_fn_return("Error (getcontext): %s", strerror(errno));
         return errno;
@@ -51,15 +53,14 @@ int task_create(task_t *task,               // descritor da nova tarefa
         return errno;
     }
 
-    context.uc_stack.ss_sp = stack;
-    context.uc_stack.ss_size = STACKSIZE;
-    context.uc_stack.ss_flags = 0;
-    context.uc_link = 0;
+    task->context.uc_stack.ss_sp = stack;
+    task->context.uc_stack.ss_size = STACKSIZE;
+    task->context.uc_stack.ss_flags = 0;
+    task->context.uc_link = 0;
 
-    makecontext(&context, (int)start_func, 1, arg);
+    makecontext(&(task->context), (int)start_func, 1, arg);
     debug_fn_step("configured context");
 
-    task->context = context;
     task->id = task_id_counter++;
 
     debug_fn_step("configured task");
@@ -73,7 +74,7 @@ void task_exit(int exitCode)
 {
     debug_fn_start("task_exit");
 
-    task_switch(main_task);
+    task_switch(&main_task);
 
     debug_fn_return(NULL);
 }
@@ -81,19 +82,14 @@ void task_exit(int exitCode)
 // alterna a execução para a tarefa indicada
 int task_switch(task_t *task)
 {
+    task_t *previous = current_task;
     debug_fn_start("task_switch");
 
     debug_fn_step("Switching tasks: %d -> %d", current_task->id, task->id);
-    debug_fn_step("Switching contexts: %p -> %p", &current_task->context, &task->context);
 
     current_task = task;
 
-    int ret = swapcontext(&(current_task->context), &(task->context));
-    if (ret != 0)
-    {
-        debug_fn_return("Error (swapcontext): %s", strerror(errno));
-        return errno;
-    }
+    int ret = swapcontext(&(previous->context), &(task->context));
 
     debug_fn_return("%d", 0);
     return 0;
