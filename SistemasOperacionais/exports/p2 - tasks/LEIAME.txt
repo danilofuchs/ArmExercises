@@ -1,0 +1,28 @@
+Fiz o projeto com sucesso utilizando ucontext no Linux.
+
+Porém, cão consegui antingir funcionamento completo na placa, pelo CCS.
+
+Há uma grande falha na implementação do assembly fornecido para troca de contextos.
+
+Só é possível trocar para um contexto novo.
+Assim que um contexto passa por task_switch, é corrompido e não consegue ser
+recuperado, já que o endereço de retorno para o corpo do contexto (LR), do ponto de vista
+de task_switch não é guardado.
+
+Entre o corpo do contexto e a chamada de 'swap_context_asm' existe uma chamada para 'task_switch'.
+É como se tivessemos uma stack de LRs (callstack). Porém, o código
+assembly não salva nem restaura o callstack. Dessa forma, da maneira que é fornecido, 
+só funciona se swap_context_asm for chamado diretamente do corpo da task.
+
+A prática P1 funcionou pois a chamada era direta.
+
+O código assembly precisa ser consertado. Infelizmente não consegui implementar a mudança necessária.
+Levei muitas horas debugando os registradores e a complexidade ficou grande demais, tomando
+boa parte da minha semana.
+
+Desta forma, estou entregando os dois projetos. Sugiro conversarmos para melhor explicar as minhas
+observações.
+
+
+
+

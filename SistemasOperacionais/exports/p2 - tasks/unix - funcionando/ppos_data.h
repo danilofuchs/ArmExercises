@@ -7,7 +7,8 @@
 #ifndef __PPOS_DATA__
 #define __PPOS_DATA__
 
-#include "ucontext.h" // biblioteca de trocas de contexto
+#include <ucontext.h> // biblioteca POSIX de trocas de contexto
+#include <stdlib.h>
 
 // Estrutura que define um Task Control Block (TCB)
 typedef struct task_t
@@ -15,6 +16,7 @@ typedef struct task_t
     struct task_t *prev, *next; // ponteiros para usar em filas
     int id;                     // identificador da tarefa
     ucontext_t context;         // contexto armazenado da tarefa
+                                // ... (outros campos serão adicionados mais tarde)
 } task_t;
 
 // estrutura que define um semáforo

@@ -4,55 +4,56 @@
 
 // Teste da gestão básica de tarefas
 
+#include <stdio.h>
+#include <stdlib.h>
 #include "ppos.h"
 #include "libraries/debug.h"
-#include "utils/uartstdio.h"
 
-task_t Ping, Pong;
+task_t MainTask, Ping, Pong;
 
 // corpo da thread Ping
-void BodyPing1(void *arg)
+void BodyPing(void *arg)
 {
     int i;
     char *name = (char *)arg;
 
-    UARTprintf("%s: inicio\n", name);
+    printf("%s: inicio\n", name);
     for (i = 0; i < 4; i++)
     {
-        UARTprintf("%s: %d\n", name, i);
+        printf("%s: %d\n", name, i);
         task_switch(&Pong);
     }
-    UARTprintf("%s: fim\n", name);
+    printf("%s: fim\n", name);
     task_exit(0);
 }
 
 // corpo da thread Pong
-void BodyPong1(void *arg)
+void BodyPong(void *arg)
 {
     int i;
     char *name = (char *)arg;
 
-    UARTprintf("%s: inicio\n", name);
+    printf("%s: inicio\n", name);
     for (i = 0; i < 4; i++)
     {
-        UARTprintf("%s: %d\n", name, i);
+        printf("%s: %d\n", name, i);
         task_switch(&Ping);
     }
-    UARTprintf("%s: fim\n", name);
+    printf("%s: fim\n", name);
     task_exit(0);
 }
 
-void task1()
+void main()
 {
-    UARTprintf("MAIN: inicio\n");
+    printf("main: inicio\n");
 
     ppos_init();
 
-    task_create(&Ping, BodyPing1, "    Ping");
-    task_create(&Pong, BodyPong1, "        Pong");
+    task_create(&Ping, BodyPing, "    Ping");
+    task_create(&Pong, BodyPong, "        Pong");
 
     task_switch(&Ping);
     task_switch(&Pong);
 
-    UARTprintf("MAIN: fim\n");
+    printf("main: fim\n");
 }

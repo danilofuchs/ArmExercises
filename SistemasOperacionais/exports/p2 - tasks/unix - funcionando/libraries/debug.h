@@ -4,13 +4,6 @@
 // Uncomment to debug
 // #define DEBUG 1
 
-//  EXAMPLE:
-//
-// ┌ [queue_size]
-// │ queue: 0
-// └─→ 0
-//
-
 // Prints a statement saying a function was called. Only runs with DEBUG is defined
 void debug_fn_start(char *fn_name);
 // Prints in the current function context, started with `debug_fn_start`. Only runs with DEBUG is defined

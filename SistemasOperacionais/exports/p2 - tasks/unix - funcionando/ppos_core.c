@@ -4,9 +4,8 @@
 #include <stdint.h>
 #include "ppos.h"
 #include "libraries/debug.h"
-#include "utils/uartstdio.h"
 
-#define STACKSIZE 128 /* tamanho de pilha das threads */
+#define STACKSIZE 32768 /* tamanho de pilha das threads */
 
 uint32_t task_id_counter = 1;
 task_t main_task;
@@ -17,13 +16,12 @@ task_t *current_task = NULL;
 // Inicializa o sistema operacional; deve ser chamada no inicio do main()
 void ppos_init()
 {
-    debug_fn_start("ppos_init");
 
     /* desativa o buffer da saida padrao (stdout), usado pela função printf */
     setvbuf(stdout, 0, _IONBF, 0);
+    debug_fn_start("ppos_init");
 
     main_task.id = 0;
-    main_task.context.initialized = 1;
     getcontext(&(main_task.context));
     current_task = &main_task;
 
@@ -32,7 +30,7 @@ void ppos_init()
 
 // gerência de tarefas =========================================================
 
-// Cria uma nova tarefa. Retorna um ID> 0 ou erro.
+// Cria uma nova tarefa. Retorna um ID > 0 ou erro.
 int task_create(task_t *task,               // descritor da nova tarefa
                 void (*start_func)(void *), // funcao corpo da tarefa
                 void *arg                   // argumentos para a tarefa
@@ -59,7 +57,7 @@ int task_create(task_t *task,               // descritor da nova tarefa
     task->context.uc_stack.ss_flags = 0;
     task->context.uc_link = 0;
 
-    makecontext(&(task->context), (int)start_func, 1, arg);
+    makecontext(&(task->context), (void *)start_func, 1, arg);
     debug_fn_step("configured context");
 
     task->id = task_id_counter++;
