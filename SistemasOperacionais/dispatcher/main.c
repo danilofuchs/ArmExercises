@@ -97,9 +97,7 @@ void ConfigureUART(void)
     UARTStdioConfig(0, 115200, g_ui32SysClock);
 }
 
-extern void task1();
-extern void task2();
-extern void task3();
+extern void program();
 
 //*****************************************************************************
 //
@@ -139,9 +137,7 @@ int main(void)
     //
     // Setup finished. Run code
     //
-    task1();
-    //task2();
-    //task3();
+    program();
 
     //
     // Turn off D1.

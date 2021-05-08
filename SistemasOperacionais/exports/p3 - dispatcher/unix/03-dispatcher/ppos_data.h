@@ -7,7 +7,8 @@
 #ifndef __PPOS_DATA__
 #define __PPOS_DATA__
 
-#include "ucontext.h" // biblioteca de trocas de contexto
+#include <ucontext.h> // biblioteca POSIX de trocas de contexto
+#include <stdlib.h>
 
 typedef enum
 {
