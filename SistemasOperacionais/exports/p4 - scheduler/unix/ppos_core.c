@@ -2,13 +2,11 @@
 #include <errno.h>
 #include <string.h>
 #include <stdint.h>
-#include <stdlib.h>
-#include "utils/uartstdio.h"
 #include "ppos.h"
 #include "libraries/debug.h"
 #include "libraries/queue.h"
 
-#define STACKSIZE 128 /* tamanho de pilha das threads */
+#define STACKSIZE 32768 /* tamanho de pilha das threads */
 #define SCHEDULER_AGING_ALPHA 1
 
 task_t dispatcher_task;
@@ -24,7 +22,7 @@ void dispatcher();
 void print_task(void *ptr)
 {
     task_t *task = ptr;
-    UARTprintf("%d", task->id);
+    printf("%d", task->id);
 }
 
 // funções gerais ==============================================================
@@ -79,7 +77,7 @@ int task_create(task_t *task,               // descritor da nova tarefa
 
     task_setprio(task, 0);
 
-    makecontext(&(task->context), (int)start_func, 1, arg);
+    makecontext(&(task->context), (void *)start_func, 1, arg);
     debug_fn_step("configured context");
 
     task->id = task_id_counter++;
